@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Userinfo
+# from .models import Userinfo
 from rest_framework import status
 from rest_framework.response import Response
 from django.contrib.auth.models import User
