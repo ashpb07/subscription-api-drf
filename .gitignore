@@ -1,0 +1,6 @@
+users\__pycache__
+payments\__pycache__
+*.env
+__pycache__/
+
+*.sqlite3
