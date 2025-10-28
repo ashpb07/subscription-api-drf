@@ -5,6 +5,9 @@ from rest_framework_simplejwt.views import (
 )
 from django.urls import path
 from .views import RegisterView,LogoutView
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 urlpatterns = [
     path('register/', RegisterView.as_view() ,name="register"),
