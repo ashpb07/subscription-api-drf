@@ -1,5 +1,6 @@
 from django.contrib import admin
-# from users.models import Userinfo
-# # Register your models here.
+from django.contrib.auth.models import User
+from users.models import EmailVerify
 
-# admin.site.register(Userinfo)
+
+admin.site.register(EmailVerify)
