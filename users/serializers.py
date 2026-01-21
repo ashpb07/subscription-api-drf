@@ -3,7 +3,7 @@ import uuid
 from rest_framework import status
 from rest_framework.response import Response
 from django.contrib.auth.models import User
-from users.models import UserProfile,EmailVerify
+from users.models import UserProfile,EmailVerify,PasswordReset
 
 
 
@@ -70,4 +70,30 @@ class ProfileSerializer(serializers.ModelSerializer):
 
                 instance.save()
                 return instance
+        
+
+
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+
+class PasswordSerializer(serializers.Serializer):
+     
+    token = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+    
+
+    def validate_token(self, value):
+        try:
+            reset_obj = PasswordReset.objects.get(password_token=value)
+        except PasswordReset.DoesNotExist:
+            raise serializers.ValidationError("Invalid token")
+
+        self.reset_obj = reset_obj
+        return value
+
+
+   
        

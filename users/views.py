@@ -3,13 +3,14 @@ from django.http import HttpResponse
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.response import Response
-from .serializers import RegisterSerializer,EmailSerializer,ProfileSerializer
+from .serializers import RegisterSerializer,EmailSerializer,ProfileSerializer,PasswordSerializer ,ForgotPasswordSerializer
 from rest_framework.views import APIView
+from emails.services import send_verification_email,send_password_reset_email
 from rest_framework_simplejwt.tokens import RefreshToken
-from users.models import UserProfile,EmailVerify
-from django.core.mail import send_mail,EmailMessage
+from users.models import UserProfile,EmailVerify,PasswordReset
 from core import settings
 from rest_framework.permissions import IsAuthenticated
+import uuid
 
 
 def index(request):
@@ -24,19 +25,11 @@ class RegisterView(APIView):
             
             token_obj = EmailVerify.objects.get(user=user) 
             token = token_obj.email_token 
-            subject="user auth test"
-            message="hello,"+user.first_name
-            from_email=settings.EMAIL_HOST_USER
-            to_list=[user.email]
-            email = EmailMessage(
-                subject=subject,
-                    body='Hello,'+user.first_name+'http://127.0.0.1:8000/api/users/verify?token='+token,
-            from_email=settings.EMAIL_HOST_USER,
-                to=[user.email],
-            )
+            send_verification_email(user, token)
+
             
             
-            email.send()
+           
             return Response(
                 {"message": "User Registered Successfully"},
                 status=status.HTTP_201_CREATED
@@ -97,7 +90,47 @@ class ProfileView(APIView):
         serializer.save()
 
         return Response(serializer.data)
-
-        
     
+
+
+
+class ForgotPasswordView(APIView):
+    def post(self, request):
+        serializer = ForgotPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data["email"]
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            # IMPORTANT: do not reveal user existence
+            return Response({"message": "If the email exists, a reset link was sent"})
+
+        token = str(uuid.uuid4())
+
+        PasswordReset.objects.create(
+            user=user,
+            password_token=token
+        )
+
+        send_password_reset_email(user, token)
+
+        return Response({"message": "If the email exists, a reset link was sent"})
+
+class PasswordResetView(APIView):
+    def post(self, request):
+        serializer = PasswordSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+
+        reset_obj = serializer.reset_obj
+        user = reset_obj.user
+        new_password = serializer.validated_data["password"]
+
+        user.set_password(new_password)
+        user.save()
+
+        reset_obj.delete() 
+
+        return Response({"message": "Password reset successful"})
 
