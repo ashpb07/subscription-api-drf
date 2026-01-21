@@ -3,7 +3,7 @@ import uuid
 from rest_framework import status
 from rest_framework.response import Response
 from django.contrib.auth.models import User
-from users.models import EmailVerify
+from users.models import UserProfile,EmailVerify
 
 
 
@@ -49,3 +49,25 @@ class EmailSerializer(serializers.Serializer):
         self.user = token_obj.user
         return value
               
+
+class ProfileSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password']
+
+
+    def update(self,instance, validated_data):
+           
+        password = validated_data.pop("password", None)
+
+        if password:
+                instance.set_password(password)
+
+                instance.username = validated_data.get("username", instance.username)
+                instance.email = validated_data.get("email", instance.email)
+
+                instance.save()
+                return instance
+       

@@ -3,12 +3,13 @@ from django.http import HttpResponse
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.response import Response
-from .serializers import RegisterSerializer,EmailSerializer
+from .serializers import RegisterSerializer,EmailSerializer,ProfileSerializer
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from users.models import EmailVerify
+from users.models import UserProfile,EmailVerify
 from django.core.mail import send_mail,EmailMessage
 from core import settings
+from rest_framework.permissions import IsAuthenticated
 
 
 def index(request):
@@ -78,14 +79,25 @@ class LogoutView(APIView):
 
 
 class ProfileView(APIView):
-    def get(self,request):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        return Response({
+            "username": request.user.username,
+            "email": request.user.email
+        })
+
+
+    def patch(self, request):
+        serializer = ProfileSerializer(
+            instance=request.user.profile,
+            data=request.data,
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
+
         
-        if User.is_authenticated:
-            return User.username
-            
-            return Response(status=status.HTTP_200_OK)
-        else:
-            pass    
-
-
+    
 

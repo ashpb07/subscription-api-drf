@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
-from users.models import EmailVerify
+from users.models import UserProfile
 
 
-admin.site.register(EmailVerify)
+admin.site.register(UserProfile)
