@@ -2,6 +2,8 @@ users\__pycache__
 payments\__pycache__
 *.env
 __pycache__/
+__pycache__/
+
 
 *.sqlite3
 flow.md
