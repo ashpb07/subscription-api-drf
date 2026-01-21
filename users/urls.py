@@ -16,6 +16,8 @@ urlpatterns = [
     path('refresh-only-accesssed-by-admin/', TokenRefreshView.as_view(), name='token_refresh'),
     path('verify/',VerifyEmailView.as_view(),name="email_verify"),
     path('profile/', ProfileView.as_view() ,name="profile"),
+    path('profile/change-password', ProfileView.as_view() ,name="profile"),
+
 
     
     
