@@ -8,6 +8,7 @@ class UserProfile(models.Model):
         related_name="profile"
     )
     email_verified = models.BooleanField(default=False)
+    date_joined=models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.user.username

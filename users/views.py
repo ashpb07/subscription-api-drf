@@ -2,8 +2,8 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from rest_framework import status
-from rest_framework.response import Response
-from .serializers import RegisterSerializer,EmailSerializer,ProfileSerializer,PasswordSerializer ,ForgotPasswordSerializer
+from rest_framework.response import Response                
+from .serializers import RegisterSerializer,EmailSerializer,ProfileSerializer,PasswordSerializer,ForgotPasswordSerializer
 from rest_framework.views import APIView
 from emails.services import send_verification_email,send_password_reset_email
 from rest_framework_simplejwt.tokens import RefreshToken
