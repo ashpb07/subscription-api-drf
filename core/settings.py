@@ -48,12 +48,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'payments',
+    
     
     'rest_framework_simplejwt',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
-    'users.apps.UsersConfig'
+    'users.apps.UsersConfig',
+    'payments.apps.PaymentsConfig',
 
 ]
 

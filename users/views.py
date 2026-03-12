@@ -10,7 +10,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from users.models import UserProfile,EmailVerify,PasswordReset
 from core import settings
 from rest_framework.permissions import IsAuthenticated
+from payments import models
 import uuid
+
 
 
 def index(request):
@@ -26,10 +28,7 @@ class RegisterView(APIView):
             token_obj = EmailVerify.objects.get(user=user) 
             token = token_obj.email_token 
             send_verification_email(user, token)
-
             
-            
-           
             return Response(
                 {"message": "User Registered Successfully"},
                 status=status.HTTP_201_CREATED
@@ -104,7 +103,7 @@ class ForgotPasswordView(APIView):
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            # IMPORTANT: do not reveal user existence
+           
             return Response({"message": "If the email exists, a reset link was sent"})
 
         token = str(uuid.uuid4())
