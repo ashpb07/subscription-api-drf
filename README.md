@@ -42,22 +42,19 @@ Users --> Database
 6. The user's membership tier is automatically upgraded.
 
 ---
-
-# Payment Processing Workflow
+## Payment Workflow
 
 ```mermaid
 sequenceDiagram
 User->>Backend: Request upgrade
 Backend->>Razorpay: Create payment order
 User->>Razorpay: Complete payment
-Razorpay->>Backend: Webhook event
-Backend->>Backend: Verify webhook signature
-Backend->>Database: Upgrade user tier
+```
 
+## Webhook Processing
+
+```mermaid
 sequenceDiagram
-User->>Backend: Request upgrade
-Backend->>Razorpay: Create payment order
-User->>Razorpay: Complete payment
 Razorpay->>Backend: Webhook event
 Backend->>Backend: Verify webhook signature
 Backend->>Database: Upgrade user tier
