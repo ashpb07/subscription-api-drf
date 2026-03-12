@@ -270,19 +270,6 @@ daphne core.asgi:application
 * Monitoring and logging support
 
 ---
-
-# License
-
-MIT License
-
-Copyright (c) 2025 Anish G Prabhu
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files to deal in the Software without restriction.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
-
----
-
 # Author
 
 **Anish G Prabhu**
