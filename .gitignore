@@ -1,9 +1,12 @@
 users\__pycache__
-payments\__pycache__
+core\payments\__pycache__
+core\emails\__pycache__
+core\core\__pycache__
 *.env
 __pycache__/
 __pycache__/
 
+core\users\__pycache__
 
 *.sqlite3
 flow.md

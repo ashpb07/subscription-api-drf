@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from users.models import UserProfile,EmailVerify,PasswordReset
+from .services import ALL_ROLES
 
 
 
@@ -101,4 +102,31 @@ class PasswordSerializer(serializers.Serializer):
 
 
    
-       
+
+
+
+class AssignRoleSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+    role = serializers.ChoiceField(choices=ALL_ROLES)
+
+    def validate_user_id(self, value):
+        try:
+            user = User.objects.get(id=value)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User does not exist")
+        
+        return value
+
+
+    def validate(self, data):
+        user_id = data["user_id"]
+        role = data["role"]
+
+        user = User.objects.get(id=user_id)
+
+        if hasattr(user, "profile") and user.profile.role == role:
+            raise serializers.ValidationError({
+                "role": "User already has this role"
+            })
+
+        return data

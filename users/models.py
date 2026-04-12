@@ -1,6 +1,19 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
+ROLE_ADMIN = "admin"
+ROLE_HR = "hr"
+ROLE_ANALYST = "analyst"
+ROLE_USER = "user"
+
+ROLE_CHOICES = [
+    (ROLE_ADMIN, "Admin"),
+    (ROLE_HR, "HR"),
+    (ROLE_ANALYST, "Analyst"),
+    (ROLE_USER, "User"),
+]
+
 class UserProfile(models.Model):
     user = models.OneToOneField(
         User,
@@ -9,7 +22,9 @@ class UserProfile(models.Model):
     )
     email_verified = models.BooleanField(default=False)
     date_joined=models.DateTimeField(auto_now_add=True)
-
+    role = models.CharField(
+    max_length=20,choices=ROLE_CHOICES,default=ROLE_USER)
+    
     def __str__(self):
         return self.user.username
 

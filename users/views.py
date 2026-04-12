@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.response import Response                
-from .serializers import RegisterSerializer,EmailSerializer,ProfileSerializer,PasswordSerializer,ForgotPasswordSerializer
+from .serializers import RegisterSerializer,EmailSerializer,ProfileSerializer,PasswordSerializer,ForgotPasswordSerializer,AssignRoleSerializer
 from rest_framework.views import APIView
 from emails.services import send_verification_email,send_password_reset_email
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -12,11 +12,9 @@ from core import settings
 from rest_framework.permissions import IsAuthenticated
 from payments import models
 import uuid
+from .services import ROLE_ASSIGNMENT_RULES,ALL_ROLES
 
 
-
-def index(request):
-    return HttpResponse("<h1>users")
 
 class RegisterView(APIView):
     def post(self, request):
@@ -94,6 +92,7 @@ class ProfileView(APIView):
 
 
 class ForgotPasswordView(APIView):
+    permission_classes=[IsAuthenticated]
     def post(self, request):
         serializer = ForgotPasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -118,6 +117,7 @@ class ForgotPasswordView(APIView):
         return Response({"message": "If the email exists, a reset link was sent"})
 
 class PasswordResetView(APIView):
+    permission_classes=[IsAuthenticated]
     def post(self, request):
         serializer = PasswordSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
@@ -133,3 +133,44 @@ class PasswordResetView(APIView):
 
         return Response({"message": "Password reset successful"})
 
+
+class AssignRoleView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+       
+        serializer = AssignRoleSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+
+        data = serializer.validated_data
+        user_id = data["user_id"]
+        target_role = data["role"]
+
+        
+        requester = request.user
+        requester_role = requester.profile.role
+
+        allowed_roles = ROLE_ASSIGNMENT_RULES.get(requester_role, [])
+
+        if target_role not in allowed_roles:
+            return Response(
+                {"error": "You are not allowed to assign this role"},
+                status=403
+            )
+        target_user = User.objects.get(id=user_id)
+
+        target_user.profile.role = target_role
+        target_user.profile.save()
+
+        return Response({
+            "message": f"Role '{target_role}' assigned successfully",
+            "user_id": user_id,
+            "new_role": target_role
+        })
+
+
+#test
+def index(request):
+    return HttpResponse("<h1>users")

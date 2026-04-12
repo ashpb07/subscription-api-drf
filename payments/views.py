@@ -2,34 +2,51 @@ from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
-
-def index(request):
-    return HttpResponse("<h1>pay</h1>")
-
-
-class PlanDetaisView(APIView):
-    
-    permission_classes = [IsAuthenticated]
-    def get(self, request):
-        return Response({
-            "username": request.user.username,
-            "email": request.user.email
-        })
-    
-
-
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 from .models import Plan, Payment, Subscription
 from .serializers import StartUpgradeSerializer
+from common.permission import HasSubsription,HasRolePermission
+
+
+
+class PlanDetaisView(APIView):
+    
+    permission_classes = [IsAuthenticated,HasSubsription]
+    def get(self, request):
+        subscription = request.user.subscription_set.filter(is_active=True).first()
+
+        plan_name = subscription.plan.name if subscription and subscription.plan else None
+
+        if not subscription:
+            return Response({"error": "No active subscription"}, status=404)
+
+        start_date =subscription.start_date 
+        end_date = subscription.end_date 
+        is_active =subscription.is_active
+        auto_renew =subscription.auto_renew 
+
+        
+        return Response({
+            "username": request.user.username,
+            "email": request.user.email,
+            
+            "plan": plan_name,
+            "start_date ":start_date,
+            "end_date ":end_date ,
+            "is_active" :is_active,
+           "auto_renew" :auto_renew
+    })
+    
+
+
+
 
 
 class StartUpgradeView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated,HasSubsription]
 
     def post(self, request):
         serializer = StartUpgradeSerializer(data=request.data)
@@ -42,7 +59,7 @@ class StartUpgradeView(APIView):
         except Plan.DoesNotExist:
             return Response({"error": "Plan not found"}, status=404)
 
-        # Create pending payment
+        
         payment = Payment.objects.create(
             user=request.user,
             amount=plan.price,
@@ -76,17 +93,15 @@ class ConfirmPaymentView(APIView):
         if payment.status == "success":
             return Response({"message": "Already confirmed"})
 
-        # Mark payment success
+        
         payment.status = "success"
         payment.save()
 
-        # Get user's subscription
         subscription = Subscription.objects.get(user=request.user)
 
-        # Find plan based on payment amount
+    
         plan = Plan.objects.get(price=payment.amount)
 
-        # Upgrade subscription
         subscription.plan = plan
         subscription.start_date = timezone.now()
         subscription.end_date = timezone.now() + timezone.timedelta(days=30)
@@ -96,3 +111,10 @@ class ConfirmPaymentView(APIView):
             "message": "Subscription upgraded",
             "new_plan": plan.name
         })
+
+
+
+
+#test
+def index(request):
+    return HttpResponse("<h1>pay</h1>")
