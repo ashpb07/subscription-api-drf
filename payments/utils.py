@@ -1,6 +1,6 @@
 from datetime import timedelta
 from django.utils import timezone
-from subscriptions.models import Subscription
+from .models import Subscription
 
 
 def activate_subscription(payment):
