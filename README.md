@@ -1,35 +1,41 @@
 # Consumer Economy Management System
 
-A **subscription-based backend platform** for managing users, payments, and automated membership tiers.
+## Overview
 
-The system integrates the **Razorpay payment gateway** with **secure webhook verification** to automatically upgrade user subscriptions after successful payments.
+A **subscription-based backend platform** designed to manage users, payments, and automated membership tiers.
 
-This project demonstrates backend engineering concepts including:
+The system integrates the **Razorpay payment gateway** with secure webhook verification to automatically upgrade user subscriptions after successful transactions.
 
-* REST API development
-* Payment gateway integration
-* Webhook security validation
-* Subscription tier management
-* Scalable backend architecture
-* Asynchronous deployment using Daphne
+This project demonstrates key backend engineering concepts including:
+
+- RESTful API development  
+- Payment gateway integration (Razorpay-ready)  
+- Secure webhook validation (HMAC verification)  
+- Subscription tier and access management  
+- Scalable and modular backend architecture  
+- Asynchronous deployment using ASGI (Daphne)  
 
 ---
 
 ---
-##  Table of Contents
+## Table of Contents
 
-- [Overview](#overview)
-- [Features](#features)
-- [System Architecture](#system-architecture)
-- [RBAC Permission Flow](#rbac-permission-flow)
-- [Payment Workflow](#payment-workflow)
-- [Webhook Processing](#webhook-processing)
-- [API Endpoints](#api-endpoints)
-- [Project Structure](#project-structure)
-- [Installation](#installation)
-- [Testing](#testing)
-- [Future Improvements](#future-improvements)
-- [Author](#author)
+| Section |
+|--------|
+| [Overview](#overview) |
+| [System Architecture](#system-architecture) |
+| [Payment Workflow](#payment-workflow) |
+| [Webhook Processing](#webhook-processing) |
+| [RBAC Permission Flow](#rbac-permission-flow) |
+| [Features](#features) |
+| [Technology Stack](#technology-stack) |
+| [Project Structure](#project-structure) |
+| [Example Membership Tiers](#example-membership-tiers) |
+| [API Endpoints](#api-endpoints) |
+| [Installation](#installation) |
+| [Testing](#testing) |
+| [Future Improvements](#future-improvements) |
+| [Author](#author) |
 ---
 
 # System Architecture
@@ -254,17 +260,18 @@ Analytics
 | GET | /api/analytics/logs/?page=1 | Paginated logs |
 
 
-Testing Notes
-| Item | Details |
-|------|--------|
-| Authentication | JWT (Bearer Token) |
-| Tool Used | Postman |
-| Header Required | Authorization: Bearer <access_token> |
-
-
-
 ---
 
+---
+# Example Membership Tiers
+
+| Tier     | Features         |
+| -------- | ---------------- |
+| Free     | Basic access     |
+| Gold     | Premium features |
+| Platinum | Full access      |
+
+---
 
 ---
 
@@ -348,16 +355,17 @@ daphne core.asgi:application
 
 ---
 
-# Example Membership Tiers
-
-| Tier     | Features         |
-| -------- | ---------------- |
-| Free     | Basic access     |
-| Gold     | Premium features |
-| Platinum | Full access      |
-
 ---
-#  Future Improvements
+# Testing
+
+The API was tested using Postman with JWT-based authentication.
+
+| Item | Details |
+|------|--------|
+| Authentication | JWT (Bearer Token) |
+| Tool Used | Postman |
+| Header Required | Authorization: Bearer <access_token> |
+# Future Improvements
 
 - Add API rate limiting and enhanced security controls  
 - Integrate Swagger/OpenAPI documentation  
