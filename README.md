@@ -1,4 +1,3 @@
----
 # Consumer Economy Management System
 
 ## Overview
