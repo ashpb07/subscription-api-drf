@@ -19,18 +19,17 @@ This project demonstrates backend engineering concepts including:
 ##  Table of Contents
 
 - [Overview](#overview)
-- [Features](#-features)
-- [System Architecture](#-system-architecture)
-- [RBAC System](#-rbac-system)
-- [Payment Workflow](#-payment-workflow)
-- [Webhook Processing](#-webhook-processing)
-- [API Endpoints](#-api-endpoints)
-- [Project Structure](#-project-structure)
-- [Installation](#-installation)
-- [Testing](#-testing)
-- [Future Improvements](#-future-improvements)
-- [License](#-license)
-- [Author](#-author)
+- [Features](#features)
+- [System Architecture](#system-architecture)
+- [RBAC Permission Flow](#rbac-permission-flow)
+- [Payment Workflow](#payment-workflow)
+- [Webhook Processing](#webhook-processing)
+- [API Endpoints](#api-endpoints)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [Testing](#testing)
+- [Future Improvements](#future-improvements)
+- [Author](#author)
 ---
 
 # System Architecture
@@ -113,9 +112,9 @@ flowchart TD
 
 ---
 
-#  Features
+# Features
 
-###  Authentication & Security
+### Authentication & Security
 - JWT-based authentication system
 - Secure password reset and email verification
 - Role-based access control (RBAC)
@@ -123,7 +122,7 @@ flowchart TD
 
 ---
 
-###  Hierarchical RBAC System
+### Hierarchical RBAC System
 - Multi-level role hierarchy: **Admin → HR → Analyst → User**
 - Admin can assign HR roles
 - HR can assign Analyst roles
@@ -131,7 +130,7 @@ flowchart TD
 
 ---
 
-###  Subscription & Payment System
+### Subscription & Payment System
 - Tier-based subscription plans (Free, Gold, Platinum)
 - Razorpay integration (payment-ready architecture)
 - Secure webhook signature verification (HMAC)
@@ -140,7 +139,7 @@ flowchart TD
 
 ---
 
-###  Analytics & Logging
+### Analytics & Logging
 - Middleware-based request logging system
 - Tracks user activity, endpoints, status codes, and IP addresses
 - Paginated logs API for scalable data retrieval
