@@ -1,120 +1,142 @@
-from django.http import HttpResponse
+import os
+import json
+import razorpay
+
+from django.conf import settings
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.utils import timezone
-from .models import Plan, Payment, Subscription
-from .serializers import StartUpgradeSerializer
-from common.permission import HasSubsription,HasRolePermission
+
+from .models import Payment, Plan
+from .utils import activate_subscription
 
 
-
-class PlanDetaisView(APIView):
-    
-    permission_classes = [IsAuthenticated,HasSubsription]
-    def get(self, request):
-        subscription = request.user.subscription_set.filter(is_active=True).first()
-
-        plan_name = subscription.plan.name if subscription and subscription.plan else None
-
-        if not subscription:
-            return Response({"error": "No active subscription"}, status=404)
-
-        start_date =subscription.start_date 
-        end_date = subscription.end_date 
-        is_active =subscription.is_active
-        auto_renew =subscription.auto_renew 
-
-        
-        return Response({
-            "username": request.user.username,
-            "email": request.user.email,
-            
-            "plan": plan_name,
-            "start_date ":start_date,
-            "end_date ":end_date ,
-            "is_active" :is_active,
-           "auto_renew" :auto_renew
-    })
-    
-
-
-
-
-
-class StartUpgradeView(APIView):
-    permission_classes = [IsAuthenticated,HasSubsription]
+# 🔹 Create Razorpay Order
+class CreatePaymentView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        serializer = StartUpgradeSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not settings.RAZORPAY_KEY_ID:
+            return Response(
+                {"error": "Payment gateway not configured"},
+                status=503
+            )
 
-        plan_name = serializer.validated_data["plan_name"]
+        client = razorpay.Client(
+            auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+        )
 
-        try:
-            plan = Plan.objects.get(name=plan_name)
-        except Plan.DoesNotExist:
-            return Response({"error": "Plan not found"}, status=404)
+        plan_id = request.data.get("plan_id")
+        plan = Plan.objects.get(id=plan_id)
 
-        
+        order = client.order.create({
+            "amount": int(plan.price * 100),
+            "currency": "INR",
+            "payment_capture": 1
+        })
+
         payment = Payment.objects.create(
             user=request.user,
+            plan=plan,
             amount=plan.price,
             status="pending",
-            transaction_id=f"txn_{timezone.now().timestamp()}",
+            transaction_id=order["id"]
         )
 
         return Response({
-            "payment_id": payment.id,
-            "amount": plan.price,
-            "plan": plan.name,
-            "message": "Proceed to payment"
+            "order_id": order["id"],
+            "amount": order["amount"],
+            "key": settings.RAZORPAY_KEY_ID
         })
-    
 
 
+# 🔹 Verify Payment (after frontend)
+class VerifyPaymentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        if not settings.RAZORPAY_KEY_ID:
+            return Response({"error": "Payment gateway not configured"}, status=503)
+
+        client = razorpay.Client(
+            auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+        )
+
+        data = {
+            "razorpay_order_id": request.data.get("razorpay_order_id"),
+            "razorpay_payment_id": request.data.get("razorpay_payment_id"),
+            "razorpay_signature": request.data.get("razorpay_signature"),
+        }
+
+        try:
+            client.utility.verify_payment_signature(data)
+
+            payment = Payment.objects.get(
+                transaction_id=data["razorpay_order_id"]
+            )
+
+            payment.status = "success"
+            payment.save()
+
+            activate_subscription(payment)
+
+            return Response({"status": "success"})
+
+        except Exception:
+            return Response({"status": "failed"}, status=400)
 
 
+# 🔹 Webhook (production)
+class RazorpayWebhookView(APIView):
 
-class ConfirmPaymentView(APIView):
+    def post(self, request):
+        if not settings.RAZORPAY_KEY_ID:
+            return Response({"status": "disabled"})
+
+        payload = request.body
+        signature = request.headers.get("X-Razorpay-Signature")
+
+        client = razorpay.Client(
+            auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+        )
+
+        try:
+            client.utility.verify_webhook_signature(
+                payload,
+                signature,
+                settings.RAZORPAY_WEBHOOK_SECRET
+            )
+
+            data = json.loads(payload)
+
+            if data["event"] == "payment.captured":
+                order_id = data["payload"]["payment"]["entity"]["order_id"]
+
+                payment = Payment.objects.get(transaction_id=order_id)
+                payment.status = "success"
+                payment.save()
+
+                activate_subscription(payment)
+
+        except Exception:
+            pass
+
+        return Response({"status": "ok"})
+
+
+# 🔹 MOCK (for testing without Razorpay)
+class MockConfirmPaymentView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
         payment_id = request.data.get("payment_id")
 
-        try:
-            payment = Payment.objects.get(id=payment_id, user=request.user)
-        except Payment.DoesNotExist:
-            return Response({"error": "Payment not found"}, status=404)
+        payment = Payment.objects.get(id=payment_id)
 
-        if payment.status == "success":
-            return Response({"message": "Already confirmed"})
-
-        
         payment.status = "success"
+        payment.transaction_id = "mock_txn"
         payment.save()
 
-        subscription = Subscription.objects.get(user=request.user)
+        activate_subscription(payment)
 
-    
-        plan = Plan.objects.get(price=payment.amount)
-
-        subscription.plan = plan
-        subscription.start_date = timezone.now()
-        subscription.end_date = timezone.now() + timezone.timedelta(days=30)
-        subscription.save()
-
-        return Response({
-            "message": "Subscription upgraded",
-            "new_plan": plan.name
-        })
-
-
-
-
-#test
-def index(request):
-    return HttpResponse("<h1>pay</h1>")
+        return Response({"status": "mock success"})

@@ -1,11 +1,14 @@
-from django.contrib import admin
-from django.urls import path,include
-from .views import *
-from .views import StartUpgradeView, ConfirmPaymentView,PlanDetaisView
+from django.urls import path
+from .views import (
+    CreatePaymentView,
+    VerifyPaymentView,
+    RazorpayWebhookView,
+    MockConfirmPaymentView
+)
+
 urlpatterns = [
-    path("plan/", PlanDetaisView.as_view()),
-    path("start-upgrade/", StartUpgradeView.as_view()),
-    path("confirm-payment/", ConfirmPaymentView.as_view()),
-
-
+    path("create/", CreatePaymentView.as_view()),
+    path("verify/", VerifyPaymentView.as_view()),
+    path("webhook/", RazorpayWebhookView.as_view()),
+    path("mock-confirm/", MockConfirmPaymentView.as_view()),
 ]

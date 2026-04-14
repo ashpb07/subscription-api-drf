@@ -3,12 +3,33 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 class Plan(models.Model):
+    name = models.CharField(max_length=50)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    duration_days = models.IntegerField()
 
-    name = models.CharField(max_length=100,unique=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
-    billing_cycle = models.CharField(max_length=50, default="monthly")
-    limits = models.JSONField(default=dict)   # {"api_calls": 5000, "storage_mb": 1000}
+    def __str__(self):
+        return self.name
 
+
+class Payment(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("success", "Success"),
+        ("failed", "Failed"),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
+
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+
+    transaction_id = models.CharField(max_length=255, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user} - {self.plan} - {self.status}"
 
 
 class Subscription(models.Model):
@@ -19,15 +40,6 @@ class Subscription(models.Model):
     is_active = models.BooleanField(default=True)
     auto_renew = models.BooleanField(default=True)
 
-
-
-class Payment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=50)
-    transaction_id = models.CharField(max_length=200)
-    timestamp = models.DateTimeField(auto_now_add=True)
 
 
 class Usage(models.Model):
