@@ -1,3 +1,4 @@
+---
 # Consumer Economy Management System
 
 ## Overview
@@ -365,6 +366,7 @@ The API was tested using Postman with JWT-based authentication.
 | Authentication | JWT (Bearer Token) |
 | Tool Used | Postman |
 | Header Required | Authorization: Bearer <access_token> |
+---
 # Future Improvements
 
 - Add API rate limiting and enhanced security controls  
