@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analytics Dashboard</title>
+
+    {% load static %}
+
+    <link rel="stylesheet" href="{% static 'analytics/css/dashboard.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>📊 Analytics Dashboard</h1>
+
+    <!-- Stats -->
+    <div class="stats">
+        <div class="card">Total Requests: <span id="totalRequests">0</span></div>
+        <div class="card">Errors: <span id="totalErrors">0</span></div>
+        <div class="card">Unique Endpoints: <span id="uniqueEndpoints">0</span></div>
+    </div>
+
+    <!-- Charts -->
+    <div class="grid">
+
+        <div class="card">
+            <h3>Requests per Endpoint</h3>
+            <canvas id="endpointChart"></canvas>
+        </div>
+
+        <div class="card">
+            <h3>Status Distribution</h3>
+            <canvas id="statusChart"></canvas>
+        </div>
+
+        <div class="card">
+            <h3>Traffic Over Time</h3>
+            <canvas id="timeChart"></canvas>
+        </div>
+
+        <div class="card">
+            <h3>Top Users</h3>
+            <canvas id="userChart"></canvas>
+        </div>
+
+    </div>
+
+    <!-- Logs -->
+    <div class="card logs">
+        <h3>Recent Logs</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Path</th>
+                    <th>Status</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody id="logTable"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script src="{% static 'analytics/js/dashboard.js' %}"></script>
+
+</body>
+</html>

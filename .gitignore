@@ -1,9 +1,76 @@
 users\__pycache__
-payments\__pycache__
+core\payments\__pycache__
+core\emails\__pycache__
+core\core\__pycache__
 *.env
 __pycache__/
 __pycache__/
 
+core\users\__pycache__
 
 *.sqlite3
 flow.md
+
+
+
+# 🔐 Environment variables
+.env
+.env.*
+
+# 🐍 Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 🧪 Virtual environment
+env/
+venv/
+ENV/
+.envrc
+
+# 📦 Django stuff
+*.log
+local_settings.py
+db.sqlite3
+
+# 🗄️ PostgreSQL (optional dumps)
+*.sql
+
+# 📁 Static & media
+staticfiles/
+media/
+
+# 🔑 Secret keys / certificates
+*.pem
+*.key
+
+# 🧠 VS Code / IDE
+.vscode/
+.idea/
+
+# 🖥️ OS files
+.DS_Store
+Thumbs.db
+
+# 📊 Coverage / testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# 📦 Build files
+dist/
+build/
+*.egg-info/
+
+# 🧾 Migrations (optional — keep if needed)
+# */migrations/*
+# !*/migrations/__init__.py
+
+# 🐳 Docker
+docker-compose.override.yml
+
+# 🔒 Logs
+*.log
+
+# 📡 Node (if frontend added later)
+node_modules/
