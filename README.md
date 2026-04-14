@@ -20,15 +20,13 @@ This project demonstrates backend engineering concepts including:
 ```mermaid
 flowchart LR
 
-flowchart LR
+    Client -->|API Requests| Backend
+    Backend --> Users
+    Backend --> Payments
+    Payments --> Razorpay
 
-Client -->|API Requests| Backend
-Backend --> Users
-Backend --> Payments
-Payments --> Razorpay
-
-Razorpay -->|Webhook Event| Backend
-Backend --> Database
+    Razorpay -->|Webhook Event| Backend
+    Backend --> Database
 ```
 
 ### Architecture Overview
@@ -97,18 +95,61 @@ flowchart TD
 
 ---
 
-# Features
+# 🚀 Features
 
-* Tier-based subscription system
-* Secure payment integration with Razorpay
-* Webhook signature verification
-* RESTful API architecture
-* Membership tier automation
-* PostgreSQL database support
-* Asynchronous deployment support with Daphne
-* Email services for password reset and notifications
-* Modular Django app architecture
+### 🔐 Authentication & Security
+- JWT-based authentication system
+- Secure password reset and email verification
+- Role-based access control (RBAC)
+- Protected APIs with fine-grained permissions
 
+---
+
+### 👥 Hierarchical RBAC System
+- Multi-level role hierarchy: **Admin → HR → Analyst → User**
+- Admin can assign HR roles
+- HR can assign Analyst roles
+- Role-based endpoint access enforcement
+
+---
+
+### 💳 Subscription & Payment System
+- Tier-based subscription plans (Free, Gold, Platinum)
+- Razorpay integration (payment-ready architecture)
+- Secure webhook signature verification (HMAC)
+- Automated subscription activation after successful payment
+- Mock payment support for testing environments
+
+---
+
+### 📊 Analytics & Logging
+- Middleware-based request logging system
+- Tracks user activity, endpoints, status codes, and IP addresses
+- Paginated logs API for scalable data retrieval
+- Analytics dashboard with traffic insights and usage metrics
+
+---
+
+### 🧠 Backend Architecture
+- Modular Django app structure (users, payments, analytics, common)
+- Clean separation of concerns
+- Scalable RESTful API design
+- Environment-based configuration for security
+
+---
+
+### ⚙️ Infrastructure & Deployment
+- PostgreSQL database support
+- ASGI deployment with Daphne
+- Production-ready configuration
+- Secure handling of environment variables
+
+---
+
+### 📧 Additional Features
+- Email services for password reset and notifications
+- Token-based authentication flows
+- API-first (headless backend) architecture
 ---
 
 # Technology Stack
@@ -299,15 +340,15 @@ daphne core.asgi:application
 | Platinum | Full access      |
 
 ---
+# 🔮 Future Improvements
 
-# Future Improvements
-
-* JWT authentication
-* Rate limiting
-* API documentation with Swagger
-* Docker containerization
-* Admin dashboard for subscription analytics
-* Monitoring and logging support
+- Add API rate limiting and enhanced security controls  
+- Integrate Swagger/OpenAPI documentation  
+- Enable full Razorpay production integration  
+- Implement real-time analytics and performance tracking  
+- Add Docker support and CI/CD pipeline  
+- Introduce Redis caching for performance optimization  
+- Improve monitoring and logging (Sentry / Prometheus)  
 
 ---
 # Author
