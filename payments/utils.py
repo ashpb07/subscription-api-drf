@@ -4,13 +4,13 @@ from .models import Subscription
 
 
 def activate_subscription(payment):
-    # deactivate old subscriptions
+    #  old subscriptions
     Subscription.objects.filter(
         user=payment.user,
         is_active=True
     ).update(is_active=False)
 
-    # create new subscription
+    #  new subscription
     Subscription.objects.create(
         user=payment.user,
         plan=payment.plan,

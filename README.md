@@ -20,16 +20,15 @@ This project demonstrates backend engineering concepts including:
 ```mermaid
 flowchart LR
 
-User -->|API Requests| Backend
+flowchart LR
+
+Client -->|API Requests| Backend
 Backend --> Users
 Backend --> Payments
 Payments --> Razorpay
 
-Razorpay -->|Webhook Event| Webhooks
-Webhooks --> Payments
-
-Payments --> Database
-Users --> Database
+Razorpay -->|Webhook Event| Backend
+Backend --> Database
 ```
 
 ### Architecture Overview
@@ -46,18 +45,54 @@ Users --> Database
 
 ```mermaid
 sequenceDiagram
-User->>Backend: Request upgrade
-Backend->>Razorpay: Create payment order
-User->>Razorpay: Complete payment
+    participant User
+    participant Backend
+    participant Razorpay
+
+    User->>Backend: Request plan upgrade
+    Backend->>Razorpay: Create order
+    Razorpay-->>User: Payment UI
+    User->>Razorpay: Complete payment
 ```
 
 ## Webhook Processing
 
 ```mermaid
 sequenceDiagram
-Razorpay->>Backend: Webhook event
-Backend->>Backend: Verify webhook signature
-Backend->>Database: Upgrade user tier
+
+    participant Razorpay
+    participant Backend
+    participant Database
+
+    Razorpay->>Backend: Webhook event
+    Backend->>Backend: Verify signature
+    Backend->>Database: Update subscription tier
+```
+
+## RBAC Permission Flow
+
+```mermaid
+flowchart TD
+
+    A[User Request] --> B[JWT Auth]
+
+    B --> C{Authenticated?}
+    C -->|No| D[Reject Request]
+    C -->|Yes| E[Check Role]
+
+    E --> F{Role Type}
+
+    F -->|Admin| G[Full System Access]
+    F -->|HR| H[Manage Roles]
+    F -->|Analyst| I[Access Analytics]
+    F -->|User| J[Basic Access]
+
+    I --> K{Has Active Subscription?}
+
+    K -->|Yes| L[Allow Analytics Access]
+    K -->|No| M[Block Access]
+
+    J --> N[Limited Features]
 ```
 
 ---
@@ -124,49 +159,54 @@ consumer-economy-system/
 
 # API Endpoints
 Authentication
-
-| Method | Endpoint                   | Description                          |
-| ------ | -------------------------- | ------------------------------------ |
-| POST   | `/api/auth/register/`      | Register a new user                  |
-| POST   | `/api/auth/login/`         | Obtain JWT access and refresh tokens |
-| POST   | `/api/auth/logout/`        | Logout user and invalidate session   |
-| POST   | `/api/auth/verify/`        | Verify user email                    |
-| POST   | `/api/auth/token/refresh/` | Refresh JWT access token             |
+| Method | Endpoint | Description |
+|:------:|----------|-------------|
+| POST | /api/users/register/ | Register new user |
+| POST | /api/users/login/ | Obtain JWT tokens |
+| POST | /api/users/logout/ | Logout user |
+| POST | /api/users/refresh/ | Refresh access token |
+| POST | /api/users/verify/ | Verify user email |
 
 
 User Profile
+| Method | Endpoint | Description |
+|:------:|----------|-------------|
+| GET | /api/users/profile/ | Retrieve user profile |
+| POST | /api/users/profile/password/reset/ | Reset password |
+| POST | /api/users/profile/password/forgot/ | Request password reset email |
 
-| Method | Endpoint                        | Description                  |
-| ------ | ------------------------------- | ---------------------------- |
-| GET    | `/api/profile/`                 | Retrieve user profile        |
-| POST   | `/api/profile/password/reset/`  | Reset password               |
-| POST   | `/api/profile/password/forgot/` | Request password reset email |
-
+Role Management (RBAC)
+| Method | Endpoint | Description |
+|:------:|----------|-------------|
+| POST | /api/users/assign-role/ | Assign role (Admin → HR → Analyst) |
 
 Subscription & Payments
 
-| Method | Endpoint                         | Description                                |
-| ------ | -------------------------------- | ------------------------------------------ |
-| POST   | `/api/payments/start-upgrade/`   | Start membership upgrade process           |
-| POST   | `/api/payments/confirm-payment/` | Confirm payment after Razorpay transaction |
+| Method | Endpoint | Description |
+|:------:|----------|-------------|
+| POST | /api/payments/create/ | Create Razorpay order |
+| POST | /api/payments/verify/ | Verify payment signature |
+| POST | /api/payments/webhook/ | Handle Razorpay webhook |
+| POST | /api/payments/mock-confirm/ | Mock payment success (testing) |
+
+Analytics
+| Method | Endpoint | Description |
+|:------:|----------|-------------|
+| GET | /api/analytics/dashboard/ | Analytics dashboard data |
+| GET | /api/analytics/logs/?page=1 | Paginated logs |
+
+
+Testing Notes
+| Item | Details |
+|------|--------|
+| Authentication | JWT (Bearer Token) |
+| Tool Used | Postman |
+| Header Required | Authorization: Bearer <access_token> |
 
 
 
 ---
 
-# Webhook Security
-
-Webhook verification ensures that payment events are authentic.
-
-The backend performs:
-
-1. Receive webhook request from Razorpay
-2. Extract `X-Razorpay-Signature`
-3. Generate HMAC using the webhook secret
-4. Compare signatures
-5. Accept or reject the request
-
-This prevents **fake payment events and subscription abuse**.
 
 ---
 
